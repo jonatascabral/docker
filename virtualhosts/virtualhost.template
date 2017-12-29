@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    root ##DOCUMENT_ROOT##;
+    index index.php index.html index.htm;
+    server_name ##SERVER_NAME##;
+
+    access_log /var/log/nginx/##SERVER_ID##-access.log;
+    error_log /var/log/nginx/##SERVER_ID##-error.log;
+
+    # Increase the post size to avoid error 413
+    client_max_body_size 128M;
+
+    location / {
+        try_files $uri $uri/ =404;"
+    }
+
+    location ~ ^/uploads/(.*)$ {
+        alias ##UPLOAD_ROOT##/$1;
+    }
+
+    location ~* ^.+.(jpg|jpeg|gif|css|png|js|ico|html|xml|txt)$ {
+        access_log        off;
+        expires           max;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass php:9000;
+
+        fastcgi_intercept_errors off;
+        fastcgi_buffers  16 16k;
+        fastcgi_buffer_size  32k;
+
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+
+    location ~ /\. {
+        log_not_found off;
+        deny all;
+    }
+}
