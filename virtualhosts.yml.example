@@ -1,0 +1,5 @@
+version: "2"
+services:
+  php:
+    extra_hosts:
+      - localhost.dev:172.19.0.3

@@ -46,9 +46,9 @@ services:
         ipv4_address: 172.19.0.4
     environment:
       TZ: "America/Sao_Paulo"
-    extra_hosts:
-      - chromatox.localhost:172.19.0.3
-      - jltransportes.localhost:172.19.0.3
+    extends:
+      file: virtualhosts.yml
+      service: php
 
 # Networks
 networks:
