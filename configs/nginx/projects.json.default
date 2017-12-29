@@ -1,0 +1,27 @@
+/*
+    Usage:
+    - Rename this file to "projects.json"
+    - Configure the variables used in each new project:
+      - serverid => Id of the VHOST used on NGINX-FPM
+      - server_name => The VHOST name used to access the project;
+      - document_root => The path of the source code, ex: /var/www/webroot/PJ-XX-XXXXX;
+      - upload_root => The path of the uploads, ex: /var/data/uploads/pjXX_xxxxx;
+      - database_name => The name of the database to be created on mysql nodes;
+      - database_user => The user name to be created on mysql nodes;
+      - database_password => The password used on the user created on mysql nodes;
+    - Use the "php ./bin/add_project" script to add new projects
+    - Don't use spaces, accents and special characters (example: @!#$%^&*(){}[] ...etc)
+        Use only underline and dots
+    - Populate the root password of the nodes
+*/
+{
+  "server_id": {
+    "server_name": "",
+    "document_root": "",
+    "upload_root": "",
+    "database_name": "",
+    "database_user": "",
+    "database_password": ""
+  },
+  "rootpassword": "123456"
+}
