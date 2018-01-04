@@ -1,0 +1,18 @@
+version: "2.1"
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./sites:/var/www/html
+      - ./volumes/nginx/logs:/var/log/nginx
+      - ./configs/nginx/virtualhosts:/etc/nginx/sites-enabled
+      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+  apache:
+    build:
+      context: ./docker/images/apache
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./sites:/var/www/html
+      - ./volumes/apache2/logs:/usr/local/apache2/logs
+      - ./configs/apache2/virtualhosts:/usr/local/apache2/conf/sites-enabled
+      - ./configs/apache2/httpd.conf:/usr/local/apache2/conf/httpd.conf

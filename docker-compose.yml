@@ -14,14 +14,12 @@ services:
       TZ: "America/Sao_Paulo"
       MYSQL_ROOT_PASSWORD: "123456"
 
-# NGINX
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./sites:/var/www/html
-      - ./volumes/nginx/logs:/var/log/nginx
-      - ./configs/nginx/virtualhosts:/etc/nginx/sites-enabled
-      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+# Webserver
+  webserver:
+    extends:
+      file: webserver.yml
+      # service: nginx
+      # service: apache
     networks:
       default:
         ipv4_address: 172.19.0.3
