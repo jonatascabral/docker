@@ -1,4 +1,4 @@
-version: "2"
+version: "2.1"
 services:
 # MySQL database
   mysql:
@@ -32,7 +32,9 @@ services:
 
 # PHP 7.1
   php:
-    image: php:7.1-fpm
+    build:
+      context: ./configs/docker/images/php
+      dockerfile: ./Dockerfile
     volumes:
       - ./sites:/var/www/html
       - ./volumes/php/logs:/var/log
