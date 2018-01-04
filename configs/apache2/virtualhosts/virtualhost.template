@@ -1,0 +1,9 @@
+<VirtualHost *:80>
+    DocumentRoot ##DOCUMENT_ROOT##
+
+    Alias /uploads ##UPLOAD_ROOT##
+    ServerName ##SERVER_NAME##
+
+    ErrorLog logs/##SERVER_ID##-error_log
+    CustomLog logs/##SERVER_ID##-access_log common
+</VirtualHost>

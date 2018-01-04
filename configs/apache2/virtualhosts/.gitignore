@@ -1,0 +1,5 @@
+*
+*/
+!.gitignore
+!virtualhost.template
+!00-default.conf
