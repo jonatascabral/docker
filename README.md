@@ -48,7 +48,7 @@ $ cp virtuahosts.yml.example virtualhosts.yml
 $ docker-compose up -d
 ```
 
-- Enjoy the docker magic `:laughing:`
+- Enjoy the docker magic :laughing:
 
 ## Adding projects
 The project comes with a php file to include projects (_bin/addproject.php_), the file reads a json and create the virtualhost, database and user for the project;
