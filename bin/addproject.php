@@ -27,10 +27,10 @@ if (empty($containers)) {
 $containers = explode("\n", $containers);
 
 // Load the project
-$jsonFile = __DIR__ . '/../configs/nginx/projects.json';
+$jsonFile = __DIR__ . '/../configs/projects.json';
 if (!file_exists($jsonFile)) {
     formatLog([
-        '"configs/nginx/projects.json" not found'
+        '"configs/projects.json" not found'
     ]);
     exit(3);
 }
@@ -40,7 +40,7 @@ $json = preg_replace('#\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/#uim', '', fi
 $projects = json_decode($json);
 if (is_null($projects)) {
     formatLog([
-        'Invalid json found at "configs/nginx/projects.json"',
+        'Invalid json found at "configs/projects.json"',
         'Check the file before continue'
     ]);
     exit(3);
@@ -56,28 +56,46 @@ if (!property_exists($projects, $projectName)) {
 }
 $project = $projects->{$projectName};
 
-// NGINX template variables
-$vhostsdir = __DIR__ . '/../configs/nginx/virtualhosts';
-$nginxbase = "{$vhostsdir}/virtualhost.template";
+// Check if webserver exists on project JSON
+if (empty($project->webserver)) {
+    formatLog([
+        'Webserver not found at project configuration',
+        'Check the file before continue'
+    ]);
+    exit(3);
+}
+
+// Webserver template variables
+$vhostsdir = __DIR__ . "/../configs/{$project->webserver}/virtualhosts";
+$webserverbase = "{$vhostsdir}/virtualhost.template";
+
+// Check if the webserver directory exists
+if (!is_file($webserverbase)) {
+    formatLog([
+        "The webserver virtualhost directory: '{$vhostsdir}' is not found",
+        'Valid values are "nginx" or "apache"'
+    ]);
+    exit(3);
+}
 
 // Set the path from the config file
-$nginxconf = "{$vhostsdir}/{$projectName}.conf";
+$webserverconf = "{$vhostsdir}/{$projectName}.conf";
 
-// Copy the NGINX conf
-$nginx = copy($nginxbase, $nginxconf);
-if ($nginx) {
-    $config = file_get_contents($nginxconf);
+// Copy the Webserver conf
+$webserver = copy($webserverbase, $webserverconf);
+if ($webserver) {
+    $config = file_get_contents($webserverconf);
     $config = strtr($config, [
         '##DOCUMENT_ROOT##' => $project->document_root,
         '##UPLOAD_ROOT##' => $project->upload_root,
         '##SERVER_NAME##' => $project->server_name,
         '##SERVER_ID##' => $projectName,
     ]);
-    $nginx = file_put_contents($nginxconf, $config);
+    $webserver = file_put_contents($webserverconf, $config);
 }
-if (false === $nginx) {
+if (false === $webserver) {
     formatLog([
-        "Something wrong occurred while coping \"{$nginxbase}\" to \"{$nginxconf}\"",
+        "Something wrong occurred while coping \"{$webserverbase}\" to \"{$webserverconf}\"",
     ]);
     exit(5);
 }
