@@ -19,7 +19,7 @@ services:
     extends:
       file: webserver.yml
       # service: nginx
-      # service: apache
+      service: apache
     networks:
       default:
         ipv4_address: 172.19.0.3
