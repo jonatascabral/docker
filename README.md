@@ -52,6 +52,8 @@ $ docker-compose up -d
 
 ## Adding projects
 The project comes with a php file to include projects (_bin/addproject.php_), the file reads a json and create the virtualhost, database and user for the project;
+
+### Usage
 ```sh
 # Duplicate the file __configs/projects.json.default__ to __configs/projects.json__
 $ cp configs/projects.json.default configs/projects.json
@@ -98,4 +100,4 @@ $ php bin/addproject.php foo-project
 - Don't forget to append the __server_name__ to your machine hosts file;
 
 ### Important
-If the __MYSQL_ROOT_PASSWORD__ is changed on _docker-compose.yml_ you must change the value of __rootpassword__ on _projects.json_
+- If the __MYSQL_ROOT_PASSWORD__ is changed on _docker-compose.yml_ you must change the value of __rootpassword__ on _projects.json_
