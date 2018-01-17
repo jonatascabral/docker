@@ -13,6 +13,6 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - ./sites:/var/www/html
-      - ./volumes/apache/logs:/usr/local/apache2/logs
+      - ./volumes/apache2/logs:/usr/local/apache2/logs
       - ./configs/apache/virtualhosts:/usr/local/apache2/conf/sites-enabled
       - ./configs/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
