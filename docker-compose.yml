@@ -2,6 +2,7 @@ version: "2.1"
 services:
 # Database
   database:
+    container_name: database
     extends:
       file: database.yml
       service: mysql
@@ -14,6 +15,7 @@ services:
 
 # Webserver
   webserver:
+    container_name: webserver
     extends:
       file: webserver.yml
       # service: nginx
@@ -28,6 +30,7 @@ services:
 
 # PHP 7.1
   php:
+    container_name: php
     build:
       context: ./configs/docker/images/php
       dockerfile: ./Dockerfile
