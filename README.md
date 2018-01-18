@@ -9,7 +9,6 @@ Docker compose file to configure a simple php development server with nginx or a
 
 ## Includes
 - PHP 7.1 FPM with extensions:
-
     |  |  |  |  |  |
     | --- | --- | --- | --- | --- |
     | bcmath | calendar | Core | ctype | curl |
@@ -23,18 +22,23 @@ Docker compose file to configure a simple php development server with nginx or a
     - Check the php docker file on _configs/docker/images/php/Dockerfile_ to install another extensions
     - See [php-docker](https://hub.docker.com/_/php/) for more information about installing extensions on a php docker container;
 - MySQL 5.7;
+- Postgres 9.6;
 - Nginx 1.13;
 - Apache 2.24;
 
 ## Usage
-```sh
-# Duplicate the file __virtualhosts.yml.example__ to __virtualhosts.yml__
-$ cp virtuahosts.yml.example virtualhosts.yml
-```
-
 ```ruby
 ...
-# Select your prefered webserver on on __docker-compose.yml__ service __webserver__
+# Select your prefered database on on docker-compose.yml service database
+  database:
+    extends:
+      file: database.yml
+      # service: mysql
+      # service: pgsql
+...
+
+...
+# Select your prefered webserver on on docker-compose.yml service webserver
   webserver:
     extends:
       file: webserver.yml
@@ -55,7 +59,7 @@ The project comes with a php file to include projects (_bin/addproject.php_), th
 
 ### Usage
 ```sh
-# Duplicate the file __configs/projects.json.default__ to __configs/projects.json__
+# Duplicate the file configs/projects.json.default to configs/projects.json
 $ cp configs/projects.json.default configs/projects.json
 ```
 
