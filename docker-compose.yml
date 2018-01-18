@@ -4,8 +4,8 @@ services:
   database:
     extends:
       file: database.yml
-      # service: mysql
-      service: pgsql
+      service: mysql
+      # service: pgsql
     networks:
       default:
         ipv4_address: 172.19.0.2
