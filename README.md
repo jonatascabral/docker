@@ -12,6 +12,7 @@ Docker compose file to configure a simple php development server with nginx or a
 
 ## Includes
 - PHP 7.1 FPM with extensions:
+
     |  |  |  |  |  |
     | --- | --- | --- | --- | --- |
     | bcmath | calendar | Core | ctype | curl |
