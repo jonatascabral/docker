@@ -68,6 +68,9 @@ $ cp configs/projects.json.default configs/projects.json
 ...
   "server_id": {
     "webserver": "apache|nginx",
+    "database": "mysql|postgres",
+    "database_rootpassword": "123456",
+
     "server_name": "",
     "document_root": "",
     "upload_root": "",
@@ -89,6 +92,9 @@ $ php bin/addproject.php <project name>
 ...
   "foo-project": {
     "webserver": "nginx",
+    "database": "postgres",
+    "database_rootpassword": "postgres",
+
     "server_name": "foo.bar.com",
     "document_root": "/var/www/foobar",
     "upload_root": "/var/www/uploads/foobar",
@@ -102,6 +108,3 @@ $ php bin/addproject.php <project name>
 $ php bin/addproject.php foo-project
 ```
 - Don't forget to append the __server_name__ to your machine hosts file;
-
-### Important
-- If the __MYSQL_ROOT_PASSWORD__ is changed on _docker-compose.yml_ you must change the value of __rootpassword__ on _projects.json_
