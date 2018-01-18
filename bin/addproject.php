@@ -14,8 +14,8 @@ if (empty($args)) {
 }
 
 // Get the containers of this docker-compose
-$prefix = basename(dirname(__DIR__));
-$containers = shell_exec('docker ps --format="{{.Names}}" | grep "'.$prefix.'\_"');
+$prefix = preg_replace('/\s|\t|-/ui', '', basename(dirname(__DIR__)));
+$containers = shell_exec('docker ps --format="{{.Names}}"');
 $containers = trim($containers);
 if (empty($containers)) {
     formatLog([
@@ -65,6 +65,24 @@ if (empty($project->webserver)) {
     exit(3);
 }
 
+// Check if database exists on project JSON
+if (empty($project->database)) {
+    formatLog([
+        'Database not found at project configuration',
+        'Check the file before continue'
+    ]);
+    exit(3);
+}
+
+// Check if database_rootpassword exists on project JSON
+if (empty($project->database_rootpassword)) {
+    formatLog([
+        'Database root password not found at project configuration',
+        'Check the file before continue'
+    ]);
+    exit(3);
+}
+
 // Webserver template variables
 $vhostsdir = __DIR__ . "/../configs/{$project->webserver}/virtualhosts";
 $webserverbase = "{$vhostsdir}/virtualhost.template";
@@ -100,73 +118,100 @@ if (false === $webserver) {
     exit(5);
 }
 
-// Append the SQL commands to create databases and users in a single connection
-$mysqlCmd = '';
-$mysqlCmd .= "CREATE DATABASE IF NOT EXISTS {$project->database_name}; " . "\n";
-$mysqlCmd .= "CREATE USER IF NOT EXISTS {$project->database_user} " .
-            "IDENTIFIED BY '{$project->database_password}'; " . "\n";
-$mysqlCmd .= "GRANT ALL ON {$project->database_name}.* TO '{$project->database_user}'@'%' " .
-            "IDENTIFIED BY '{$project->database_password}'; " . "\n" . "\n";
-
-// Get the PHP containers
-$phpcontainers = array_filter($containers, function ($item) {
-    return (strpos($item, 'php') !== false);
+// Get the Webserver containers
+$webservercontainers = array_filter($containers, function ($item) {
+    return (strpos($item, 'webserver') !== false);
 });
 
-// Foreach the PHP and restart it
-foreach ($phpcontainers as $php) {
+// Foreach the Webserver and restart it
+foreach ($webservercontainers as $webserver) {
     // Execute the command
-    exec("docker restart {$php}", $output, $result);
+    exec("docker restart {$webserver}", $output, $result);
 
     // If not success result message log
     if (0 !== $result) {
         formatLog([
-            "Container \"{$php}\" return status \"{$result}\""
+            "Container \"{$webserver}\" return status \"{$result}\""
         ]);
         exit(6);
     }
     formatLog([
-        "Container \"{$php}\" configuration successful"
+        "Container \"{$webserver}\" configuration successful"
     ], 'info');
 }
 
-// Get the MySQL containers
-$mysqlcontainers = array_filter($containers, function ($item) {
-    return (strpos($item, 'mysql') !== false);
+// Create the SQL commands array
+$databaseCmd = [];
+switch ($project->database) {
+    case 'mysql':
+        $databaseCmd[] = "CREATE DATABASE IF NOT EXISTS {$project->database_name}; ";
+        $databaseCmd[] = "CREATE USER IF NOT EXISTS {$project->database_user} " .
+                    "IDENTIFIED BY '{$project->database_password}'; ";
+        $databaseCmd[] = "GRANT ALL ON {$project->database_name}.* TO '{$project->database_user}'@'%' " .
+                    "IDENTIFIED BY '{$project->database_password}'; ";
+        break;
+    case 'postgres':
+        $databaseCmd[] = "CREATE USER {$project->database_user} " .
+                         "PASSWORD '{$project->database_password}'; ";
+        if (strpos($project->database_name, '.') !== false) {
+            list($schema, $database) = explode('.', $project->database_name);
+            $databaseCmd[] = "CREATE SCHEMA {$schema}; ";
+            $databaseCmd[] = "CREATE DATABASE {$database}; ";
+
+            $databaseCmd[] = "GRANT ALL ON SCHEMA {$schema} TO" .
+                             " \"{$project->database_user}\"; ";
+        } else {
+            $databaseCmd[] = "CREATE DATABASE {$project->database_name}; ";
+            $databaseCmd[] = "GRANT ALL ON DATABASE {$project->database_name} TO" .
+                             " \"{$project->database_user}\"; ";
+        }
+        break;
+}
+
+// Get the Database containers
+$databasecontainers = array_filter($containers, function ($item) {
+    return (strpos($item, 'database') !== false);
 });
 
-// Foreach the MySQL containers to create the databases
-foreach ($mysqlcontainers as $mysql) {
-    // If mysql query is empty continue
-    if (empty($mysqlCmd)) {
-        continue;
+// Foreach the Database containers to create the databases
+foreach ($databasecontainers as $database) {
+    // If database query is empty continue
+    if (empty($databaseCmd)) {
+        break;
     }
 
     // Get the mapped port from this container
-    $port = shell_exec("docker port {$mysql}");
+    $port = shell_exec("docker port {$database}");
     $port = trim(preg_replace('/(.*)\:(\d+)$/ui', '$2', $port));
 
     // Instance the pdo conn
+    $driver = getDbDriver($project->database);
+    $user = getDbRootUser($project->database);
     $conn = new PDO(
-        "mysql:host=localhost:{$port}",
-        'root',
-        $projects->rootpassword,
+        "{$driver}:host=127.0.0.1;port={$port}",
+        $user,
+        $project->database_rootpassword,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
     // Execute the create statement
-    $result = $conn->exec($mysqlCmd);
-
-    // If not success result message log
-    if (empty($result)) {
-        formatLog([
-            "MySQL container \"{$mysql}\" return status \"{$result}\""
-        ]);
-        exit(7);
+    foreach ($databaseCmd as $i => $cmd) {
+        try {
+            $result = $conn->exec($cmd);
+            formatLog([
+                "Executed \"{$cmd}\""
+            ], 'debug');
+        } catch (PDOException $e) {
+            formatLog([
+                "Database container \"{$database}\" return status \"{$e->getMessage()}\""
+            ]);
+            exit(7);
+        }
     }
-    shell_exec("docker restart {$mysql}");
+
+    shell_exec("docker restart {$database}");
     formatLog([
-        "MySQL container \"{$mysql}\" configuration successful"
+        "Database container \"{$database}\" configuration successful"
     ], 'info');
 }
 
@@ -187,18 +232,53 @@ function formatLog($messages, $logType = 'error')
         'error' => $red,
         'warn' => $yellow,
         'info' => $blue,
+        'debug' => $green,
         'default' => $nocolor,
     ];
     $color = $logColors[$logType] ?: $cyan;
     $count = array_reduce($messages, function ($a, $b) {
         return strlen($a) > strlen($b) ? $a : $b;
     });
-    $count = strlen($count) + 1;
+    $count = strlen($count) + 2;
+    $start = "{$color}  ";
     foreach ($messages as &$message) {
-        $message = "$color " . str_pad($message, $count, ' ', STR_PAD_RIGHT) . $nocolor;
+        $message = $start . str_pad($message, $count, ' ', STR_PAD_RIGHT) . $nocolor;
     }
-    $separator = "$color " . str_pad("", $count, ' ', STR_PAD_RIGHT) . $nocolor;
+    $separator = $start . str_pad("", $count, ' ', STR_PAD_RIGHT) . $nocolor;
     echo "\n" . $separator . "\n" . implode("\n", $messages) . "\n" . $separator . "\n\n";
 
     return;
+}
+
+function getDbData($database, $dataType)
+{
+    switch ($database) {
+        case 'mysql':
+            $driver = 'mysql';
+            $user = 'root';
+            break;
+
+        case 'postgres':
+            $driver = 'pgsql';
+            $user = 'postgres';
+            break;
+
+        default:
+            throw new Exception("Invalid database", 1);
+            break;
+    }
+    if ($dataType === 'driver') {
+        return $driver;
+    }
+    return $user;
+}
+
+function getDbDriver($database)
+{
+    return getDbData($database, 'driver');
+}
+
+function getDbRootUser($database)
+{
+    return getDbData($database, 'user');
 }
