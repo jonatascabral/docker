@@ -5,7 +5,10 @@ Docker compose file to configure a simple php development server with nginx or a
 ## Requirements
 - Docker >= 1.13;
 - Docker compose >= 1.18;
-- PHP >= 5.6 (For command line project binary);
+- For command line addproject binary:
+  - PHP >= 5.6 with __shell_exec__ and __exec__ functions enabled;
+  - pdo_mysql (For __mysql__ database);
+  - pdo_pgsql (For __postgres__ database);
 
 ## Includes
 - PHP 7.1 FPM with extensions:
