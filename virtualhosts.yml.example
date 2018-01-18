@@ -2,4 +2,4 @@ version: "2.1"
 services:
   php:
     extra_hosts:
-      - localhost.dev:172.19.0.3
+      - localhost.dev:172.36.0.3

@@ -8,7 +8,7 @@ services:
       # service: pgsql
     networks:
       default:
-        ipv4_address: 172.19.0.2
+        ipv4_address: 172.36.0.2
     environment:
       TZ: "America/Sao_Paulo"
 
@@ -20,7 +20,7 @@ services:
       service: apache
     networks:
       default:
-        ipv4_address: 172.19.0.3
+        ipv4_address: 172.36.0.3
     environment:
       TZ: "America/Sao_Paulo"
     links:
@@ -37,7 +37,7 @@ services:
       - ./configs/php/fpm.conf:/usr/local/etc/php-fpm.d/www.conf
     networks:
       default:
-        ipv4_address: 172.19.0.4
+        ipv4_address: 172.36.0.4
     environment:
       TZ: "America/Sao_Paulo"
     links:
@@ -52,4 +52,4 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.19.0.0/24
+      - subnet: 172.36.0.0/24
