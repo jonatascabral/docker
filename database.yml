@@ -1,0 +1,20 @@
+version: "2.1"
+services:
+# MySQL
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./volumes/mysql/datadir:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+# PostgreSQL
+  pgsql:
+    image: postgres:9.6
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/pgsql/datadir:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "123456"
