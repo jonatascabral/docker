@@ -21,6 +21,7 @@ RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-di
         gettext \
         intl \
         mcrypt \
+        mysqli \
         pdo \
         pdo_mysql \
         pdo_sqlite \
