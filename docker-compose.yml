@@ -36,6 +36,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - ./sites:/var/www/html
+      - ./uploads:/var/www/uploads
       - ./volumes/php/logs:/var/log
       - ./configs/php/fpm.conf:/usr/local/etc/php-fpm.d/www.conf
     networks:

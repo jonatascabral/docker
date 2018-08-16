@@ -4,6 +4,7 @@ services:
     image: nginx:latest
     volumes:
       - ./sites:/var/www/html
+      - ./uploads:/var/www/uploads
       - ./volumes/nginx/logs:/var/log/nginx
       - ./configs/nginx/virtualhosts:/etc/nginx/sites-enabled
       - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -13,6 +14,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - ./sites:/var/www/html
+      - ./uploads:/var/www/uploads
       - ./volumes/apache2/logs:/usr/local/apache2/logs
       - ./configs/apache/virtualhosts:/usr/local/apache2/conf/sites-enabled
       - ./configs/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
