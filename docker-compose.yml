@@ -18,8 +18,8 @@ services:
     container_name: webserver
     extends:
       file: webserver.yml
-      # service: nginx
-      service: apache
+      service: nginx
+      # service: apache
     networks:
       default:
         ipv4_address: 172.36.0.3
